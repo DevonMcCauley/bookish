@@ -3,7 +3,6 @@ import Book from "../models/Book";
 
 const BOOKS: Book[] = [];
 
-
 // Generates a handful of books (pre-database implementation)
 export const generateBooks = () => {
 	BOOKS.push(new Book(1, "Book1", "Author1"));
@@ -22,7 +21,6 @@ export const getBooks: RequestHandler = (
 	res.json({ book: BOOKS });
 };
 
-
 // Creates a single book
 export const createBook: RequestHandler = (
 	req: Request,
@@ -38,18 +36,35 @@ export const createBook: RequestHandler = (
 	res.status(201).json({ message: "Created book" });
 };
 
-
 // Finds and returns a single book by its ID
 export const getBookByID: RequestHandler = (
 	req: Request,
 	res: Response,
 	next: NextFunction
 ) => {
-	
 	const bookID: number = Number.parseInt(req.params.bookID);
 
-	const foundBook = BOOKS.find((b) => {
-		return b.id == bookID;
+	const foundBook = BOOKS.find((book) => {
+		return book.id == bookID;
 	});
-	res.json({ Book: foundBook });
+	res.status(201).json({ Book: foundBook });
+};
+
+// Finds and deletes a single book by its ID
+export const deleteBookByID: RequestHandler = (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const bookID: number = Number.parseInt(req.params.bookID);
+
+	const bookIndex = BOOKS.findIndex((book) => {
+		return book.id === bookID;
+	});
+
+	if (bookIndex !== -1) {
+		BOOKS.splice(bookIndex, 1);
+	}
+
+	res.status(201).json({ message: "Removed book" });
 };
