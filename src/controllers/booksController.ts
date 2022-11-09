@@ -1,91 +1,124 @@
-import { NextFunction, Request, RequestHandler, Response } from "express";
-import Book from "../models/Book";
-
-const BOOKS: Book[] = [];
-
-// Generates a handful of books (pre-database implementation)
-export const generateBooks = () => {
-	BOOKS.push(new Book(1, "Book1", "Author1"));
-	BOOKS.push(new Book(2, "Book2", "Author2"));
-	BOOKS.push(new Book(3, "Book3", "Author3"));
-	BOOKS.push(new Book(4, "Book4", "Author4"));
-	BOOKS.push(new Book(5, "Book4", "Author5"));
-};
+import { Request, RequestHandler, Response } from "express";
+import { collections } from "../services/database";
+import { ObjectId } from "mongodb";
 
 // Returns all books
-export const getBooks: RequestHandler = (
-	req: Request,
-	res: Response,
-	next: NextFunction
-) => {
-	res.json({ book: BOOKS });
+export const getBooks: RequestHandler = async (req: Request, res: Response) => {
+	try {
+		const books = await collections.books!.find({}).toArray();
+		res.status(200).send({ success: true, books });
+	} catch (error: any) {
+		res.status(500).send({ success: false, error: error.message });
+	}
 };
 
 // Creates a single book
-export const createBook: RequestHandler = (
+export const createBook: RequestHandler = async (
 	req: Request,
-	res: Response,
-	next: NextFunction
+	res: Response
 ) => {
-	const bookTitle = req.body.title;
-	const bookAuthor = req.body.author;
+	try {
+		const newBook = req.body;
+		const result = await collections.books!.insertOne(newBook);
 
-	const newBook = new Book(Math.random(), bookTitle, bookAuthor);
-
-	BOOKS.push(newBook);
-	res.status(201).json({ message: "Created book" });
+		if (result) {
+			res.status(201).send({
+				success: true,
+				message: `Successfully created book`,
+				book: newBook,
+			});
+		} else {
+			res.status(500).send({
+				success: false,
+				message: "Failed to create a new book",
+			});
+		}
+	} catch (error: any) {
+		res.status(400).send({ success: false, message: error.message });
+	}
 };
 
 // Finds and returns a single book by its ID
-export const getBookByID: RequestHandler = (
+export const getBookByID: RequestHandler = async (
 	req: Request,
-	res: Response,
-	next: NextFunction
+	res: Response
 ) => {
-	const bookID: number = Number.parseInt(req.params.bookID);
+	const id = req?.params?.bookID;
+	try {
+		const query = { _id: new ObjectId(id) };
+		const book = await collections.books!.findOne(query);
 
-	const foundBook = BOOKS.find((book) => {
-		return book.id == bookID;
-	});
-	res.status(201).json({ Book: foundBook });
+		if (book) {
+			res.status(200).send({
+				success: true,
+				message: "Successfully created book",
+				book,
+			});
+		}
+	} catch (error: any) {
+		res.status(404).send({ success: false, message: error.message });
+	}
 };
 
 // Finds and deletes a single book by its ID
-export const deleteBookByID: RequestHandler = (
+export const deleteBookByID: RequestHandler = async (
 	req: Request,
-	res: Response,
-	next: NextFunction
+	res: Response
 ) => {
-	const bookID: number = Number.parseInt(req.params.bookID);
+	const id = req?.params?.bookID;
 
-	const bookIndex = BOOKS.findIndex((book) => {
-		return book.id === bookID;
-	});
+	try {
+		const query = { _id: new ObjectId(id) };
+		const result = await collections.books!.deleteOne(query);
 
-	if (bookIndex !== -1) {
-		BOOKS.splice(bookIndex, 1);
+		if (result && result.deletedCount) {
+			res.status(202).send({
+				success: true,
+				message: `Successfully deleted book with id: ${id}`,
+			});
+		} else if (!result) {
+			res.status(400).send({
+				success: false,
+				message: `Failed to delete book with id: ${id}`,
+			});
+		} else if (!result.deletedCount) {
+			res.status(404).send({
+				success: false,
+				message: `A book with id: ${id} does not exist`,
+			});
+		}
+	} catch (error: any) {
+		res.status(400).send({ success: false, message: error.message });
 	}
-
-	res.status(201).json({ message: "Removed book" });
 };
 
 // Finds and updates a single book by its ID
-export const updateBookByID: RequestHandler = (
+export const updateBookByID: RequestHandler = async (
 	req: Request,
-	res: Response,
-	next: NextFunction
+	res: Response
 ) => {
-	const bookID: number = Number.parseInt(req.params.bookID);
-	const title = req.body.title;
-	const author = req.body.author;
+	const id = req?.params?.id;
 
-	const bookIndex = BOOKS.findIndex((book) => {
-		return book.id === bookID;
-	});
+	try {
+		const updatedBook = req.body;
+		const query = { _id: new ObjectId(id) };
+		// $set adds or updates all fields
+		const result = await collections.books!.updateOne(query, {
+			$set: updatedBook,
+		});
 
-	let book = BOOKS[bookIndex];
-	book.title = title;
-	book.author = author;
-
-	res.status(201).json({ message: "Updated book" });
+		if (result) {
+			res.status(200).send({
+				success: true,
+				message: "Sucessfully updated book",
+			});
+		} else {
+			res.status(304).send({
+				success: true,
+				message: `Book with id: ${id} was not updated`,
+			});
+		}
+	} catch (error: any) {
+		res.status(400).send({ success: false, message: error.message });
+	}
 };

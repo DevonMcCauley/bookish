@@ -1,15 +1,11 @@
+import { ObjectId } from "mongodb";
 class Book {
-	title: string;
-	author: string;
-	id: number;
-
 	// Book class
-
-	constructor(id: number, title: string, author: string) {
-		this.id = id;
-		this.title = title;
-		this.author = author;
-	}
+	constructor(
+		public title: string,
+		public author: string,
+		public id?: ObjectId
+	) {}
 }
 
 export default Book;

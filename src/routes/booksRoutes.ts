@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { updateBookByID } from "../controllers/booksController";
 import {
 	getBooks,
 	createBook,
 	getBookByID,
 	deleteBookByID,
+	updateBookByID,
 } from "../controllers/booksController";
 
 const router = Router();
