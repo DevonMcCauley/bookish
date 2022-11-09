@@ -1,11 +1,5 @@
-import { ObjectId } from "mongodb";
-class Book {
-	// Book class
-	constructor(
-		public title: string,
-		public author: string,
-		public id?: ObjectId
-	) {}
-}
+import { model } from "mongoose";
+import BookSchema from "./schemas/BookSchema";
 
+const Book = model<IBook>("Book", BookSchema);
 export default Book;
