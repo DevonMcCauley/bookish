@@ -3,15 +3,83 @@ import mongoose from 'mongoose';
 import bookSchema from '../models/schemas/BookSchema';
 import Book from '../models/Book';
 
+// TODO: Refactor getBooks to reduce code repetition3
+
 // Returns all books
 export const getBooks: RequestHandler = async (req: Request, res: Response) => {
-	try {
-		const Book = mongoose.model('Book', bookSchema);
-		const books = await Book.find();
-		res.status(200).send({ success: true, books });
-	} catch (error) {
-		if (error instanceof Error) {
-			res.status(500).send({ success: false, error: error.message });
+	const author = req.body.author;
+	const title = req.body.title;
+	const Book = mongoose.model('Book', bookSchema);
+
+	// Determines which type of query to perform
+	if (author && title) {
+		// Search on author AND title
+		try {
+			const books = await Book.find({ title: title, author: author });
+			console.log(books);
+			if (books.length == 0) {
+				res.status(200).send({
+					success: true,
+					message: `No books were found with title: ${title} & author: ${author}`,
+				});
+			} else {
+				res.status(200).send({ success: true, books });
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				res.status(500).send({ success: false, error: error.message });
+			}
+		}
+	} else if (author) {
+		// Search on author
+		try {
+			const books = await Book.find({ author: author });
+			if (books.length == 0) {
+				res.status(200).send({
+					success: true,
+					message: `No books were found with author: ${author}`,
+				});
+			} else {
+				res.status(200).send({ success: true, books });
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				res.status(500).send({ success: false, error: error.message });
+			}
+		}
+	} else if (title) {
+		// Search on title
+		try {
+			const books = await Book.find({ title: title });
+			if (books.length == 0) {
+				res.status(200).send({
+					success: true,
+					message: `No books were found with title: ${title}`,
+				});
+			} else {
+				res.status(200).send({ success: true, books });
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				res.status(500).send({ success: false, error: error.message });
+			}
+		}
+	} else {
+		// Return all books
+		try {
+			const books = await Book.find();
+			if (books.length == 0) {
+				res.status(200).send({
+					success: true,
+					message: `No books were found`,
+				});
+			} else {
+				res.status(200).send({ success: true, books });
+			}
+		} catch (error) {
+			if (error instanceof Error) {
+				res.status(500).send({ success: false, error: error.message });
+			}
 		}
 	}
 };
@@ -110,6 +178,23 @@ export const updateBookByID: RequestHandler = async (
 	} catch (error) {
 		if (error instanceof Error) {
 			res.status(400).send({ success: false, message: error.message });
+		}
+	}
+};
+
+export const getBooksByAuthor: RequestHandler = async (
+	req: Request,
+	res: Response
+) => {
+	const author = req?.params?.author;
+	console.log(author);
+	try {
+		const Book = mongoose.model('Book', bookSchema);
+		const books = await Book.find({ author: author });
+		res.status(200).send({ success: true, books });
+	} catch (error) {
+		if (error instanceof Error) {
+			res.status(404).send({ success: false, message: error.message });
 		}
 	}
 };
