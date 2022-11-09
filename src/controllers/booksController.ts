@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import bookSchema from '../models/schemas/BookSchema';
 import Book from '../models/Book';
 
-// TODO: Refactor getBooks to reduce code repetition3
+// TODO: Refactor getBooks to reduce code repetition
 
 // Returns all books
 export const getBooks: RequestHandler = async (req: Request, res: Response) => {
