@@ -68,3 +68,24 @@ export const deleteBookByID: RequestHandler = (
 
 	res.status(201).json({ message: "Removed book" });
 };
+
+// Finds and updates a single book by its ID
+export const updateBookByID: RequestHandler = (
+	req: Request,
+	res: Response,
+	next: NextFunction
+) => {
+	const bookID: number = Number.parseInt(req.params.bookID);
+	const title = req.body.title;
+	const author = req.body.author;
+
+	const bookIndex = BOOKS.findIndex((book) => {
+		return book.id === bookID;
+	});
+
+	let book = BOOKS[bookIndex];
+	book.title = title;
+	book.author = author;
+
+	res.status(201).json({ message: "Updated book" });
+};
