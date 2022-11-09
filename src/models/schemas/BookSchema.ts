@@ -1,4 +1,4 @@
-import { Schema, model, connect } from "mongoose";
+import { Schema } from "mongoose";
 
 const bookSchema = new Schema<IBook>({
 	title: { type: String, required: true },
