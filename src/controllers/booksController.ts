@@ -1,16 +1,18 @@
-import { Request, RequestHandler, Response } from "express";
-import mongoose, { model } from "mongoose";
-import bookSchema from "../models/schemas/BookSchema";
-import Book from "../models/Book";
+import { Request, RequestHandler, Response } from 'express';
+import mongoose from 'mongoose';
+import bookSchema from '../models/schemas/BookSchema';
+import Book from '../models/Book';
 
 // Returns all books
 export const getBooks: RequestHandler = async (req: Request, res: Response) => {
 	try {
-		const Book = mongoose.model("Book", bookSchema);
+		const Book = mongoose.model('Book', bookSchema);
 		const books = await Book.find();
 		res.status(200).send({ success: true, books });
-	} catch (error: any) {
-		res.status(500).send({ success: false, error: error.message });
+	} catch (error) {
+		if (error instanceof Error) {
+			res.status(500).send({ success: false, error: error.message });
+		}
 	}
 };
 
@@ -32,8 +34,10 @@ export const createBook: RequestHandler = async (
 			message: `Successfully created book`,
 			book: book,
 		});
-	} catch (error: any) {
-		res.status(400).send({ success: false, message: error.message });
+	} catch (error) {
+		if (error instanceof Error) {
+			res.status(400).send({ success: false, message: error.message });
+		}
 	}
 };
 
@@ -44,11 +48,13 @@ export const getBookByID: RequestHandler = async (
 ) => {
 	const id = req?.params?.bookID;
 	try {
-		const Book = mongoose.model("Book", bookSchema);
+		const Book = mongoose.model('Book', bookSchema);
 		const book = await Book.findById({ _id: id });
 		res.status(200).send({ success: true, book });
-	} catch (error: any) {
-		res.status(404).send({ success: false, message: error.message });
+	} catch (error) {
+		if (error instanceof Error) {
+			res.status(404).send({ success: false, message: error.message });
+		}
 	}
 };
 
@@ -73,8 +79,10 @@ export const deleteBookByID: RequestHandler = async (
 				message: `Failed to delete book with id: ${id}`,
 			});
 		}
-	} catch (error: any) {
-		res.status(400).send({ success: false, message: error.message });
+	} catch (error) {
+		if (error instanceof Error) {
+			res.status(400).send({ success: false, message: error.message });
+		}
 	}
 };
 
@@ -96,10 +104,12 @@ export const updateBookByID: RequestHandler = async (
 
 		res.status(200).send({
 			success: true,
-			message: "Sucessfully updated book",
+			message: 'Sucessfully updated book',
 			book,
 		});
-	} catch (error: any) {
-		res.status(400).send({ success: false, message: error.message });
+	} catch (error) {
+		if (error instanceof Error) {
+			res.status(400).send({ success: false, message: error.message });
+		}
 	}
 };
