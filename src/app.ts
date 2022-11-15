@@ -2,7 +2,7 @@ import express, { Express } from 'express';
 import * as dotenv from 'dotenv';
 import { json } from 'body-parser';
 import mongoose from 'mongoose';
-import bookRoutes from './src/routes/booksRoutes';
+import bookRoutes from './routes/booksRoutes';
 
 dotenv.config();
 
@@ -30,3 +30,5 @@ async function startDatabase() {
 app.listen(port, () => {
 	console.log(`Server started at http://localhost:${port}`);
 });
+
+export default app;

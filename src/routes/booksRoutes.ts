@@ -5,7 +5,7 @@ import {
 	getBookByID,
 	deleteBookByID,
 	updateBookByID,
-} from '../controllers/booksController';
+} from '../controllers/bookController';
 
 const router = Router();
 
